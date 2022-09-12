@@ -1,5 +1,5 @@
-const InvariantError = require("../../exception/InvariantError");
-const { SongPayloadSchema } = require("./schema");
+const InvariantError = require('../../exception/InvariantError');
+const { SongPayloadSchema } = require('./schema');
 
 const SongValidator = {
   validateSongPayload: (payload) => {

@@ -1,18 +1,18 @@
 // Apply dotenv
-require("dotenv").config();
+require('dotenv').config();
 
-const Hapi = require("@hapi/hapi");
-const album = require("./api/album");
-const song = require("./api/song");
+const Hapi = require('@hapi/hapi');
+const album = require('./api/album');
+const song = require('./api/song');
 
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 5000,
     host:
-      process.env.NODE_ENV === "production" ? process.env.HOST : "127.0.0.1",
+      process.env.NODE_ENV === 'production' ? process.env.HOST : '127.0.0.1',
     routes: {
       cors: {
-        origin: ["*"],
+        origin: ['*'],
       },
     },
   });

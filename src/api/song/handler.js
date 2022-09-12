@@ -1,4 +1,4 @@
-const { ErrorHandler } = require("../../util/util");
+const { ErrorHandler } = require('../../util/util');
 
 class SongHandler {
   constructor(service, validator) {
@@ -18,7 +18,7 @@ class SongHandler {
 
       const songId = await this._service.addSong(request.payload);
       const response = h.response({
-        status: "success",
+        status: 'success',
         data: {
           songId: songId,
         },
@@ -35,7 +35,7 @@ class SongHandler {
 
     const songs = await this._service.getSongs({ title, performer });
     return {
-      status: "success",
+      status: 'success',
       data: {
         songs,
       },
@@ -48,7 +48,7 @@ class SongHandler {
       const song = await this._service.getSongById(id);
 
       return {
-        status: "success",
+        status: 'success',
         data: {
           song: song,
         },
@@ -67,8 +67,8 @@ class SongHandler {
       await this._service.editSongById(id, request.payload);
 
       return {
-        status: "success",
-        message: "Song Updated!",
+        status: 'success',
+        message: 'Song Updated!',
       };
     } catch (err) {
       return ErrorHandler(h, err);
@@ -80,8 +80,8 @@ class SongHandler {
       const { id } = request.params;
       await this._service.deleteSongById(id);
       return {
-        status: "success",
-        message: "Song Deleted!",
+        status: 'success',
+        message: 'Song Deleted!',
       };
     } catch (err) {
       return ErrorHandler(h, err);

@@ -1,4 +1,4 @@
-const { ErrorHandler } = require("../../util/util");
+const { ErrorHandler } = require('../../util/util');
 
 class AlbumHandler {
   constructor(service, validator) {
@@ -25,7 +25,7 @@ class AlbumHandler {
       });
 
       const response = h.response({
-        status: "success",
+        status: 'success',
         data: {
           albumId: albumId,
         },
@@ -41,7 +41,7 @@ class AlbumHandler {
   async getAlbumsHandler() {
     const albums = await this._service.getAlbums();
     return {
-      status: "success",
+      status: 'success',
       data: {
         albums,
       },
@@ -53,7 +53,7 @@ class AlbumHandler {
       const { id } = request.params;
       const album = await this._service.getAlbumById(id);
       return {
-        status: "success",
+        status: 'success',
         data: {
           album: album,
         },
@@ -74,8 +74,8 @@ class AlbumHandler {
       await this._service.editAlbumById(id, { name, year });
 
       return {
-        status: "success",
-        message: "Album Updated!",
+        status: 'success',
+        message: 'Album Updated!',
       };
     } catch (error) {
       return ErrorHandler(h, error);
@@ -89,8 +89,8 @@ class AlbumHandler {
       await this._service.deleteAlbumById(id);
 
       return {
-        status: "success",
-        message: "Album Deleted!",
+        status: 'success',
+        message: 'Album Deleted!',
       };
     } catch (error) {
       return ErrorHandler(h, error);

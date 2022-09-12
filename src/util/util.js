@@ -1,9 +1,9 @@
-const ClientError = require("../exception/ClientError");
+const ClientError = require('../exception/ClientError');
 
 function ErrorHandler(h, error) {
   if (error instanceof ClientError) {
     const response = h.response({
-      status: "fail",
+      status: 'fail',
       message: error.message,
     });
     response.code(error.statusCode);
@@ -12,8 +12,8 @@ function ErrorHandler(h, error) {
 
   // Internal System Error
   const response = h.response({
-    status: "error",
-    message: "Internal System Error",
+    status: 'error',
+    message: 'Internal System Error',
   });
   response.code(500);
   return response;
