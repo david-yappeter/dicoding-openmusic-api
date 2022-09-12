@@ -2,7 +2,11 @@ const { nanoid } = require("nanoid");
 const { Pool } = require("pg");
 const InvariantError = require("../../exception/InvariantError");
 const NotFoundError = require("../../exception/NotFoundError");
-const { mapSongToResponse, mapSongToResponseList } = require("../../util/util");
+const {
+  mapSongToResponse,
+  mapSongToResponseList,
+  ErrorHandler,
+} = require("../../util/util");
 
 class SongService {
   constructor() {
@@ -39,30 +43,26 @@ class SongService {
   }
 
   async getSongs({ title, performer }) {
-    try {
-      let result;
-      if (title && performer) {
-        result = await this._pool.query({
-          text: `SELECT * FROM songs WHERE lower(title) LIKE lower($1) AND lower(performer) LIKE lower($2)`,
-          values: [`%${title}%`, `%${performer}%`],
-        });
-      } else if (title) {
-        result = await this._pool.query({
-          text: `SELECT * FROM songs WHERE lower(title) LIKE lower($1)`,
-          values: [`%${title}%`],
-        });
-      } else if (performer) {
-        result = await this._pool.query({
-          text: `SELECT * FROM songs WHERE lower(performer) LIKE lower($1)`,
-          values: [`%${performer}%`],
-        });
-      } else {
-        result = await this._pool.query("SELECT * FROM songs");
-      }
-      return result.rows.map(mapSongToResponseList);
-    } catch (err) {
-      console.log(err);
+    let result;
+    if (title && performer) {
+      result = await this._pool.query({
+        text: `SELECT * FROM songs WHERE lower(title) LIKE lower($1) AND lower(performer) LIKE lower($2)`,
+        values: [`%${title}%`, `%${performer}%`],
+      });
+    } else if (title) {
+      result = await this._pool.query({
+        text: `SELECT * FROM songs WHERE lower(title) LIKE lower($1)`,
+        values: [`%${title}%`],
+      });
+    } else if (performer) {
+      result = await this._pool.query({
+        text: `SELECT * FROM songs WHERE lower(performer) LIKE lower($1)`,
+        values: [`%${performer}%`],
+      });
+    } else {
+      result = await this._pool.query("SELECT * FROM songs");
     }
+    return result.rows.map(mapSongToResponseList);
   }
 
   async getSongById(id) {

@@ -16,7 +16,6 @@ function ErrorHandler(h, error) {
     message: "Internal System Error",
   });
   response.code(500);
-  console.log(error);
   return response;
 }
 

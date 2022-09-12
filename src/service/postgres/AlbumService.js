@@ -43,8 +43,6 @@ class AlbumService {
     };
     const result = await this._pool.query(query);
 
-    console.log(id);
-    console.log(result.rows.length);
     if (!result.rows.length) {
       throw new NotFoundError("No Data Found");
     }
