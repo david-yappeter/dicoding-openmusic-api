@@ -3,6 +3,7 @@ require("dotenv").config();
 
 const Hapi = require("@hapi/hapi");
 const album = require("./api/album");
+const song = require("./api/song");
 
 const init = async () => {
   const server = Hapi.server({
@@ -17,6 +18,7 @@ const init = async () => {
   });
 
   await server.register({ plugin: album });
+  await server.register({ plugin: song });
 
   await server.start();
   console.log(`server start at ${server.info.uri}`);

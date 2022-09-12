@@ -1,4 +1,3 @@
-const ClientError = require("../../exception/ClientError");
 const { ErrorHandler } = require("../../util/util");
 
 class AlbumHandler {

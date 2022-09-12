@@ -20,6 +20,30 @@ function ErrorHandler(h, error) {
   return response;
 }
 
+function mapSongToResponseList(song) {
+  return {
+    id: song.id,
+    title: song.title,
+    performer: song.performer,
+  };
+}
+
+function mapSongToResponse(song) {
+  return {
+    id: song.id,
+    title: song.title,
+    year: song.year,
+    genre: song.genre,
+    performer: song.performer,
+    duration: song.duration,
+    albumId: song.album_id,
+    created_at: song.created_at,
+    updated_at: song.updated_at,
+  };
+}
+
 module.exports = {
   ErrorHandler,
+  mapSongToResponseList,
+  mapSongToResponse,
 };
