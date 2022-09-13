@@ -25,6 +25,7 @@ const init = async () => {
   });
 
   await server.register({ plugin: Jwt });
+  server.ext('onPreResponse', PanicHandler);
 
   // JWT Strategy
   server.auth.strategy('_openmusic_jwt', 'jwt', {
@@ -43,15 +44,18 @@ const init = async () => {
     }),
   });
 
-  await server.register([
-    { plugin: album },
-    { plugin: song },
-    { plugin: user },
-    { plugin: authentication },
-    { plugin: playlist },
-  ]);
-
-  server.ext('onPreResponse', PanicHandler);
+  await server.register({ plugin: album });
+  await server.register({ plugin: song });
+  await server.register({ plugin: user });
+  await server.register({ plugin: authentication });
+  await server.register({ plugin: playlist });
+  // await server.register([
+  //   { plugin: album },
+  //   { plugin: song },
+  //   { plugin: user },
+  //   { plugin: authentication },
+  //   { plugin: playlist },
+  // ]);
 
   await server.start();
   console.log(`server start at ${server.info.uri}`);

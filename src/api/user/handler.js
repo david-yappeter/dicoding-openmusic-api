@@ -1,3 +1,5 @@
+const { ErrorHandler } = require('../../util/util');
+
 class UserHandler {
   constructor(service, validator) {
     this._service = service;
@@ -7,17 +9,22 @@ class UserHandler {
   }
 
   async postUserHandler(request, h) {
-    this._validator.validateUserPayload(request.payload);
+    try {
+      this._validator.validateUserPayload(request.payload);
 
-    const userId = await this._service.addUser(request.payload);
-    const response = h.response({
-      status: 'success',
-      data: {
-        userId: userId,
-      },
-    });
-    response.code(201);
-    return response;
+      const userId = await this._service.addUser(request.payload);
+      const response = h.response({
+        status: 'success',
+        data: {
+          userId: userId,
+        },
+      });
+      response.code(201);
+      return response;
+    } catch (err) {
+      console.log('AAA', err);
+      return ErrorHandler(h, err);
+    }
   }
 }
 

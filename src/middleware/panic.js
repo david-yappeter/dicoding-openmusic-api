@@ -10,6 +10,7 @@ const PanicHandler = (request, h) => {
     newResponse.code(response.statusCode);
     return newResponse;
   }
+
   return response.continue || response;
 };
 
