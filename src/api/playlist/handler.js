@@ -1,42 +1,28 @@
-class AuthenticationsHandler {
-  constructor(authenticationService, userService, tokenManager, validator) {
-    this._authenticationsService = authenticationService;
-    this._userService = userService;
-    this._tokenManager = tokenManager;
+class PlaylistHandler {
+  constructor(service, validator) {
+    this._service = service;
     this._validator = validator;
 
-    this.postAuthenticationHandler = this.postAuthenticationHandler.bind(this);
+    this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
     this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
     this.deleteAuthenticationHandler =
       this.deleteAuthenticationHandler.bind(this);
   }
 
-  async postAuthenticationHandler(request, h) {
+  async postPlaylistHandler(request, h) {
     // Validation
-    this._validator.validatePostAuthenticationPayload(request.payload);
-    // TODO: Get Credentials EXAMPLE
-    // const { id: credentialId } = request.auth.credentials;
-    // const noteId = await this._service.addNote({
-    //   title, body, tags, owner: credentialId,
-    // });
+    this._validator.validatePostPlaylistPayload(request.payload);
+    // Credentials
+    const { id: credentialId } = request.auth.credentials;
+    // Payload
+    const { name } = request.payload;
 
-    const { username, password } = request.payload;
-    const id = await this._userService.verifyUserCredential({
-      username,
-      password,
-    });
-
-    const accessToken = this._tokenManager.generateAccessToken({ id });
-    const refreshToken = this._tokenManager.generateRefreshToken({ id });
-
-    await this._authenticationsService.addRefreshToken(refreshToken);
+    const playlistId = this._service.addPlaylist({ name, owner: credentialId });
 
     const response = h.response({
       status: 'success',
-      message: 'Authentication Success',
       data: {
-        accessToken,
-        refreshToken,
+        playlistId: playlistId,
       },
     });
     response.code(201);
@@ -76,4 +62,4 @@ class AuthenticationsHandler {
   }
 }
 
-module.exports = AuthenticationsHandler;
+module.exports = PlaylistHandler;

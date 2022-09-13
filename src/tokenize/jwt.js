@@ -1,5 +1,5 @@
 const Jwt = require('@hapi/jwt');
-const InvariantError = require('../src/exception/InvariantError');
+const InvariantError = require('../exception/InvariantError');
 
 const TokenManager = {
   generateAccessToken: (payload) =>

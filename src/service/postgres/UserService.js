@@ -2,6 +2,7 @@ const { Pool } = require('pg');
 const bcrypt = require('bcrypt');
 const { nanoid } = require('nanoid');
 const InvariantError = require('../../exception/InvariantError');
+const UnauthorizedError = require('../../exception/UnauthorizedError');
 
 class UserService {
   constructor() {
@@ -17,7 +18,7 @@ class UserService {
     const hashedPassword = bcrypt.hash(password, 10);
 
     const query = {
-      text: 'INSERT INTO users(id, username, password, fullname, created_at, updated_at) VALUES($1,$2,$3,$4,$5,$6) RETURNING id',
+      text: 'INSERT INTO users(id, username, password, fullname, created_at, updated_at) VALUES($1,lower($2),$3,$4,$5,$6) RETURNING id',
       values: [
         id,
         username,
@@ -39,7 +40,7 @@ class UserService {
 
   async verifyExistingUserName(username) {
     const query = {
-      text: 'SELECT username FROM users WHERE username = $1',
+      text: 'SELECT username FROM users WHERE lower(username) = lower($1)',
       values: [username],
     };
 
@@ -48,6 +49,28 @@ class UserService {
     if (result.rowCount > 0) {
       throw new InvariantError('Username Taken');
     }
+  }
+
+  async verifyUserCredential({ username, password }) {
+    const query = {
+      text: 'SELECT id, password FROM users WHERE lower(username) = lower($1)',
+      values: [username],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    const { id, password: hashedPassword } = result.rows[0];
+    const match = await bcrypt.compare(password, hashedPassword);
+
+    if (!match) {
+      throw new UnauthorizedError('Invalid credentials');
+    }
+
+    return id;
   }
 }
 

@@ -1,9 +1,7 @@
 const Joi = require('joi');
 
-const UserPayloadSchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().required(),
-  fullname: Joi.string().required(),
+const PlaylistPayloadSchema = Joi.object({
+  name: Joi.string().required(),
 });
 
-module.exports = { UserPayloadSchema: UserPayloadSchema };
+module.exports = { PlaylistPayloadSchema: PlaylistPayloadSchema };
