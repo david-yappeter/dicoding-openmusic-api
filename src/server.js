@@ -6,6 +6,8 @@ const Jwt = require('@hapi/jwt');
 
 const album = require('./api/album');
 const song = require('./api/song');
+const user = require('./api/user');
+
 const { PanicHandler } = require('./middleware/panic');
 
 const init = async () => {
@@ -39,7 +41,11 @@ const init = async () => {
     }),
   });
 
-  await server.register([{ plugin: album }, { plugin: song }]);
+  await server.register([
+    { plugin: album },
+    { plugin: song },
+    { plugin: user },
+  ]);
 
   server.ext('onPreResponse', PanicHandler);
 
