@@ -13,12 +13,11 @@ class AlbumService {
 
   async addAlbum({ name, year }) {
     const id = nanoid(16);
-    const created_at = new Date().toISOString();
-    const updated_at = created_at;
+    const current_time = new Date().toISOString();
 
     const query = {
       text: 'INSERT INTO albums (id, name, year, created_at, updated_at) VALUES($1, $2, $3, $4, $5) RETURNING id',
-      values: [id, name, year, created_at, updated_at],
+      values: [id, name, year, current_time, current_time],
     };
 
     const result = await this._pool.query(query);
@@ -33,7 +32,6 @@ class AlbumService {
   async getAlbums() {
     const result = await this._pool.query('SELECT * FROM albums');
     return result.rows;
-    // return result.rows.map(mapDBToModel);
   }
 
   async getAlbumById(id) {
@@ -43,7 +41,7 @@ class AlbumService {
     };
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
 
@@ -64,7 +62,7 @@ class AlbumService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
   }
@@ -77,7 +75,7 @@ class AlbumService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
   }

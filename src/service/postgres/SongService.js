@@ -2,7 +2,7 @@ const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const InvariantError = require('../../exception/InvariantError');
 const NotFoundError = require('../../exception/NotFoundError');
-const { mapSongToResponse, mapSongToResponseList } = require('../../util/util');
+const { mapSongToResponse } = require('../../util/util');
 
 class SongService {
   constructor() {
@@ -11,8 +11,7 @@ class SongService {
 
   async addSong({ title, year, genre, performer, duration, albumId }) {
     const id = nanoid(16);
-    const created_at = new Date().toISOString();
-    const updated_at = created_at;
+    const current_time = new Date().toISOString();
 
     const query = {
       text: 'INSERT INTO songs(id, title, year, genre, performer, duration, album_id, created_at, updated_at) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING id',
@@ -24,8 +23,8 @@ class SongService {
         performer,
         duration,
         albumId,
-        created_at,
-        updated_at,
+        current_time,
+        current_time,
       ],
     };
 
@@ -42,23 +41,23 @@ class SongService {
     let result;
     if (title && performer) {
       result = await this._pool.query({
-        text: 'SELECT * FROM songs WHERE lower(title) LIKE lower($1) AND lower(performer) LIKE lower($2)',
+        text: 'SELECT id, title, performer FROM songs WHERE lower(title) LIKE lower($1) AND lower(performer) LIKE lower($2)',
         values: [`%${title}%`, `%${performer}%`],
       });
     } else if (title) {
       result = await this._pool.query({
-        text: 'SELECT * FROM songs WHERE lower(title) LIKE lower($1)',
+        text: 'SELECT id, title, performer FROM songs WHERE lower(title) LIKE lower($1)',
         values: [`%${title}%`],
       });
     } else if (performer) {
       result = await this._pool.query({
-        text: 'SELECT * FROM songs WHERE lower(performer) LIKE lower($1)',
+        text: 'SELECT id, title, performer FROM songs WHERE lower(performer) LIKE lower($1)',
         values: [`%${performer}%`],
       });
     } else {
-      result = await this._pool.query('SELECT * FROM songs');
+      result = await this._pool.query('SELECT id, title, performer FROM songs');
     }
-    return result.rows.map(mapSongToResponseList);
+    return result.rows;
   }
 
   async getSongById(id) {
@@ -69,7 +68,7 @@ class SongService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
 
@@ -103,7 +102,7 @@ class SongService {
     };
 
     const result = await this._pool.query(query);
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
   }
@@ -116,20 +115,20 @@ class SongService {
 
     const result = await this._pool.query(query);
 
-    if (!result.rows.length) {
+    if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
   }
 
   async getSongByAlbumId(albumId) {
     const query = {
-      text: 'SELECT * FROM songs WHERE album_id = $1',
+      text: 'SELECT id, title, performer FROM songs WHERE album_id = $1',
       values: [albumId],
     };
 
     const result = await this._pool.query(query);
 
-    return result.rows.map(mapSongToResponseList);
+    return result.rows;
   }
 }
 

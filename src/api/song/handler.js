@@ -1,5 +1,3 @@
-const { ErrorHandler } = require('../../util/util');
-
 class SongHandler {
   constructor(service, validator) {
     this._service = service;
@@ -13,21 +11,17 @@ class SongHandler {
   }
 
   async postSongHandler(request, h) {
-    try {
-      this._validator.validateSongPayload(request.payload);
+    this._validator.validateSongPayload(request.payload);
 
-      const songId = await this._service.addSong(request.payload);
-      const response = h.response({
-        status: 'success',
-        data: {
-          songId: songId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    const songId = await this._service.addSong(request.payload);
+    const response = h.response({
+      status: 'success',
+      data: {
+        songId: songId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async getSongsHandler(request) {
@@ -42,50 +36,38 @@ class SongHandler {
     };
   }
 
-  async getSongByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      const song = await this._service.getSongById(id);
+  async getSongByIdHandler(request) {
+    const { id } = request.params;
+    const song = await this._service.getSongById(id);
 
-      return {
-        status: 'success',
-        data: {
-          song: song,
-        },
-      };
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    return {
+      status: 'success',
+      data: {
+        song: song,
+      },
+    };
   }
 
-  async putSongByIdHandler(request, h) {
-    try {
-      // Validator
-      this._validator.validateSongPayload(request.payload);
+  async putSongByIdHandler(request) {
+    // Validator
+    this._validator.validateSongPayload(request.payload);
 
-      const { id } = request.params;
-      await this._service.editSongById(id, request.payload);
+    const { id } = request.params;
+    await this._service.editSongById(id, request.payload);
 
-      return {
-        status: 'success',
-        message: 'Song Updated!',
-      };
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    return {
+      status: 'success',
+      message: 'Song Updated!',
+    };
   }
 
-  async deleteSongByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      await this._service.deleteSongById(id);
-      return {
-        status: 'success',
-        message: 'Song Deleted!',
-      };
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+  async deleteSongByIdHandler(request) {
+    const { id } = request.params;
+    await this._service.deleteSongById(id);
+    return {
+      status: 'success',
+      message: 'Song Deleted!',
+    };
   }
 }
 
