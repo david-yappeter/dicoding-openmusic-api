@@ -9,5 +9,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.removeConstraint('fk_playlists_users.id');
+  pgm.dropConstraint('playlists', 'fk_playlists_users.id');
 };

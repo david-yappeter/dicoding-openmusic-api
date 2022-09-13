@@ -1,5 +1,3 @@
-const { ErrorHandler } = require('../../util/util');
-
 class AlbumHandler {
   constructor(service, validator) {
     this._service = service;
@@ -13,29 +11,25 @@ class AlbumHandler {
   }
 
   async postAlbumHandler(request, h) {
-    try {
-      // Validator
-      this._validator.validateAlbumPayload(request.payload);
+    // Validator
+    this._validator.validateAlbumPayload(request.payload);
 
-      const { name, year } = request.payload;
+    const { name, year } = request.payload;
 
-      const albumId = await this._service.addAlbum({
-        name: name,
-        year: year,
-      });
+    const albumId = await this._service.addAlbum({
+      name: name,
+      year: year,
+    });
 
-      const response = h.response({
-        status: 'success',
-        data: {
-          albumId: albumId,
-        },
-      });
+    const response = h.response({
+      status: 'success',
+      data: {
+        albumId: albumId,
+      },
+    });
 
-      response.code(201);
-      return response;
-    } catch (error) {
-      return ErrorHandler(h, error);
-    }
+    response.code(201);
+    return response;
   }
 
   async getAlbumsHandler() {
@@ -48,53 +42,41 @@ class AlbumHandler {
     };
   }
 
-  async getAlbumByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
-      const album = await this._service.getAlbumById(id);
-      return {
-        status: 'success',
-        data: {
-          album: album,
-        },
-      };
-    } catch (error) {
-      return ErrorHandler(h, error);
-    }
+  async getAlbumByIdHandler(request) {
+    const { id } = request.params;
+    const album = await this._service.getAlbumById(id);
+    return {
+      status: 'success',
+      data: {
+        album: album,
+      },
+    };
   }
 
-  async putAlbumByIdHandler(request, h) {
-    try {
-      // Validation
-      this._validator.validateAlbumPayload(request.payload);
+  async putAlbumByIdHandler(request) {
+    // Validation
+    this._validator.validateAlbumPayload(request.payload);
 
-      const { id } = request.params;
-      const { name, year } = request.payload;
+    const { id } = request.params;
+    const { name, year } = request.payload;
 
-      await this._service.editAlbumById(id, { name, year });
+    await this._service.editAlbumById(id, { name, year });
 
-      return {
-        status: 'success',
-        message: 'Album Updated!',
-      };
-    } catch (error) {
-      return ErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Album Updated!',
+    };
   }
 
-  async deleteAlbumByIdHandler(request, h) {
-    try {
-      const { id } = request.params;
+  async deleteAlbumByIdHandler(request) {
+    const { id } = request.params;
 
-      await this._service.deleteAlbumById(id);
+    await this._service.deleteAlbumById(id);
 
-      return {
-        status: 'success',
-        message: 'Album Deleted!',
-      };
-    } catch (error) {
-      return ErrorHandler(h, error);
-    }
+    return {
+      status: 'success',
+      message: 'Album Deleted!',
+    };
   }
 }
 

@@ -29,7 +29,7 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('fk_collaborations_playlists.id');
-  pgm.dropConstraint('fk_collaborations_users.id');
+  pgm.dropConstraint('collaborations', 'fk_collaborations_playlists.id');
+  pgm.dropConstraint('collaborations', 'fk_collaborations_users.id');
   pgm.dropTable('collaborations');
 };

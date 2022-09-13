@@ -10,6 +10,9 @@ function ErrorHandler(h, error) {
     return response;
   }
 
+  // Log Error
+  console.log(error);
+
   // Internal System Error
   const response = h.response({
     status: 'error',

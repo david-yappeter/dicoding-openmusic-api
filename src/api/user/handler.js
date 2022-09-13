@@ -9,22 +9,17 @@ class UserHandler {
   }
 
   async postUserHandler(request, h) {
-    try {
-      this._validator.validateUserPayload(request.payload);
+    this._validator.validateUserPayload(request.payload);
 
-      const userId = await this._service.addUser(request.payload);
-      const response = h.response({
-        status: 'success',
-        data: {
-          userId: userId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (err) {
-      console.log('AAA', err);
-      return ErrorHandler(h, err);
-    }
+    const userId = await this._service.addUser(request.payload);
+    const response = h.response({
+      status: 'success',
+      data: {
+        userId: userId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 }
 

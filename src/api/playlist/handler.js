@@ -12,70 +12,58 @@ class PlaylistHandler {
   }
 
   async postPlaylistHandler(request, h) {
-    try {
-      // Validation
-      this._validator.validatePostPlaylistPayload(request.payload);
-      // Credentials
-      const { id: credentialId } = request.auth.credentials;
-      // Payload
-      const { name } = request.payload;
+    // Validation
+    this._validator.validatePostPlaylistPayload(request.payload);
+    // Credentials
+    const { id: credentialId } = request.auth.credentials;
+    // Payload
+    const { name } = request.payload;
 
-      const playlistId = this._service.addPlaylist({
-        name,
-        owner: credentialId,
-      });
+    const playlistId = this._service.addPlaylist({
+      name,
+      owner: credentialId,
+    });
 
-      const response = h.response({
-        status: 'success',
-        data: {
-          playlistId: playlistId,
-        },
-      });
-      response.code(201);
-      return response;
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    const response = h.response({
+      status: 'success',
+      data: {
+        playlistId: playlistId,
+      },
+    });
+    response.code(201);
+    return response;
   }
 
   async putAuthenticationHandler(request, h) {
-    try {
-      // Validator
-      this._validator.validatePutAuthenticationPayload(request.payload);
+    // Validator
+    this._validator.validatePutAuthenticationPayload(request.payload);
 
-      const { refreshToken } = request.payload;
-      await this._authenticationsService.verifyRefreshToken(refreshToken);
-      const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
+    const { refreshToken } = request.payload;
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
 
-      const accessToken = this._tokenManager.generateAccessToken({ id });
-      return {
-        status: 'success',
-        message: 'Access Token Updated!',
-        data: {
-          accessToken,
-        },
-      };
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    const accessToken = this._tokenManager.generateAccessToken({ id });
+    return {
+      status: 'success',
+      message: 'Access Token Updated!',
+      data: {
+        accessToken,
+      },
+    };
   }
 
   async deleteAuthenticationHandler(request, h) {
-    try {
-      // Validator
-      this._validator.validateDeleteAuthenticationPayload(request.payload);
+    // Validator
+    this._validator.validateDeleteAuthenticationPayload(request.payload);
 
-      const { refreshToken } = request.payload;
-      await this._authenticationsService.verifyRefreshToken(refreshToken);
-      await this._authenticationsService.deleteRefreshToken(refreshToken);
+    const { refreshToken } = request.payload;
+    await this._authenticationsService.verifyRefreshToken(refreshToken);
+    await this._authenticationsService.deleteRefreshToken(refreshToken);
 
-      return {
-        status: 'success',
-        message: 'Refresh token berhasil dihapus',
-      };
-    } catch (err) {
-      return ErrorHandler(h, err);
-    }
+    return {
+      status: 'success',
+      message: 'Refresh token berhasil dihapus',
+    };
   }
 }
 

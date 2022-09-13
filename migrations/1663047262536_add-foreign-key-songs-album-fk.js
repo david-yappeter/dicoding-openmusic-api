@@ -9,5 +9,5 @@ exports.up = (pgm) => {
 };
 
 exports.down = (pgm) => {
-  pgm.dropConstraint('fk_songs_album.id');
+  pgm.dropConstraint('songs', 'fk_songs_album.id');
 };

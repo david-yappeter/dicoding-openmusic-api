@@ -11,19 +11,19 @@ class UserService {
 
   async addUser({ username, password, fullname }) {
     // Verify Username Exist
-    this.verifyExistingUserName(username);
+    await this.verifyExistingUserName(username);
 
     const id = `usr-${nanoid(16)}`;
-    const hashedPassword = bcrypt.hash(password, 10);
+    const current_time = new Date().toISOString();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const query = {
-      text: 'INSERT INTO users(id, username, password, fullname) VALUES($1,lower($2),$3,$4) RETURNING id',
-      values: [id, username, hashedPassword, fullname],
+      text: 'INSERT INTO users(id, username, password, fullname, created_at, updated_at) VALUES($1,lower($2),$3,$4,$5,$5) RETURNING id',
+      values: [id, username, hashedPassword, fullname, current_time],
     };
 
     const result = await this._pool.query(query);
 
-    console.log(result.rowCount);
     if (!result.rowCount) {
       throw InvariantError('Failed to create user');
     }

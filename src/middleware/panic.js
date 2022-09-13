@@ -11,7 +11,11 @@ const PanicHandler = (request, h) => {
     return newResponse;
   }
 
-  return response.continue || response;
+  if (response.continue) {
+    return response;
+  }
+
+  return response;
 };
 
 module.exports = {
