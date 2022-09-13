@@ -1,5 +1,3 @@
-const { ErrorHandler } = require('../../util/util');
-
 class SongHandler {
   constructor(service, validator) {
     this._service = service;
@@ -26,7 +24,7 @@ class SongHandler {
     return response;
   }
 
-  async getSongsHandler(request, h) {
+  async getSongsHandler(request) {
     const { title, performer } = request.query;
 
     const songs = await this._service.getSongs({ title, performer });
@@ -38,7 +36,7 @@ class SongHandler {
     };
   }
 
-  async getSongByIdHandler(request, h) {
+  async getSongByIdHandler(request) {
     const { id } = request.params;
     const song = await this._service.getSongById(id);
 
@@ -50,7 +48,7 @@ class SongHandler {
     };
   }
 
-  async putSongByIdHandler(request, h) {
+  async putSongByIdHandler(request) {
     // Validator
     this._validator.validateSongPayload(request.payload);
 
@@ -63,7 +61,7 @@ class SongHandler {
     };
   }
 
-  async deleteSongByIdHandler(request, h) {
+  async deleteSongByIdHandler(request) {
     const { id } = request.params;
     await this._service.deleteSongById(id);
     return {

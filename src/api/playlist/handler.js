@@ -1,25 +1,27 @@
-const { ErrorHandler } = require('../../util/util');
-
 class PlaylistHandler {
-  constructor(service, validator) {
-    this._service = service;
+  constructor(playlistService, songService, validator) {
+    this._service = playlistService;
+    this._songService = songService;
     this._validator = validator;
 
     this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
-    this.putAuthenticationHandler = this.putAuthenticationHandler.bind(this);
-    this.deleteAuthenticationHandler =
-      this.deleteAuthenticationHandler.bind(this);
+    this.getPlaylistsHandler = this.getPlaylistsHandler.bind(this);
+    this.getPlaylistByIdWithSongsHandler =
+      this.getPlaylistByIdWithSongsHandler.bind(this);
+    this.postPlaylistSongHandler = this.postPlaylistSongHandler.bind(this);
+    this.deletePlaylistByIdHandler = this.deletePlaylistByIdHandler.bind(this);
+    this.deletePlaylistSongHandler = this.deletePlaylistSongHandler.bind(this);
   }
 
   async postPlaylistHandler(request, h) {
     // Validation
-    this._validator.validatePostPlaylistPayload(request.payload);
+    this._validator.validatePlaylistPayload(request.payload);
     // Credentials
     const { id: credentialId } = request.auth.credentials;
     // Payload
     const { name } = request.payload;
 
-    const playlistId = this._service.addPlaylist({
+    const playlistId = await this._service.addPlaylist({
       name,
       owner: credentialId,
     });
@@ -34,35 +36,85 @@ class PlaylistHandler {
     return response;
   }
 
-  async putAuthenticationHandler(request, h) {
-    // Validator
-    this._validator.validatePutAuthenticationPayload(request.payload);
+  async getPlaylistsHandler(request) {
+    const { id: credentialId } = request.auth.credentials;
+    const playlists = await this._service.getPlaylists({ owner: credentialId });
 
-    const { refreshToken } = request.payload;
-    await this._authenticationsService.verifyRefreshToken(refreshToken);
-    const { id } = this._tokenManager.verifyRefreshToken(refreshToken);
-
-    const accessToken = this._tokenManager.generateAccessToken({ id });
     return {
       status: 'success',
-      message: 'Access Token Updated!',
       data: {
-        accessToken,
+        playlists,
       },
     };
   }
 
-  async deleteAuthenticationHandler(request, h) {
-    // Validator
-    this._validator.validateDeleteAuthenticationPayload(request.payload);
+  async postPlaylistSongHandler(request, h) {
+    const { id } = request.params;
+    const { songId } = request.payload;
+    const { id: credentialId } = request.auth.credentials;
 
-    const { refreshToken } = request.payload;
-    await this._authenticationsService.verifyRefreshToken(refreshToken);
-    await this._authenticationsService.deleteRefreshToken(refreshToken);
+    await this._validator.validatePlaylistSongPayload(request.payload);
+    // Throw Bad Request if no Song found
+    await this._songService.getSongById(songId);
+
+    await this._service.verifyPlaylistOwner({ id: id, owner: credentialId });
+
+    await this._service.addPlaylistSong({ playlistId: id, songId });
+
+    const response = h.response({
+      status: 'success',
+      message: 'Song  Added',
+    });
+    response.code(201);
+    return response;
+  }
+
+  async getPlaylistByIdWithSongsHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._service.verifyPlaylistOwner({ id: id, owner: credentialId });
+
+    const playlist = await this._service.getPlaylistByIdWithSongs(id);
 
     return {
       status: 'success',
-      message: 'Refresh token berhasil dihapus',
+      data: {
+        playlist: playlist,
+      },
+    };
+  }
+
+  async deletePlaylistByIdHandler(request) {
+    const { id } = request.params;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._service.verifyPlaylistOwner({ id: id, owner: credentialId });
+
+    await this._service.deletePlaylistById(id);
+
+    return {
+      status: 'success',
+      message: 'Deleted!',
+    };
+  }
+
+  async deletePlaylistSongHandler(request) {
+    const { id } = request.params;
+    const { songId } = request.payload;
+    const { id: credentialId } = request.auth.credentials;
+
+    await this._validator.validatePlaylistSongPayload(request.payload);
+    // Throw Bad Request if no Song found
+    await this._songService.getSongById(songId);
+
+    await this._service.verifyPlaylistOwner({ id: id, owner: credentialId });
+
+    await this._service.deletePlaylistSongBySongId({ playlistId: id, songId });
+
+    return {
+      status: 'success',
+      message: 'Song removed',
     };
   }
 }
