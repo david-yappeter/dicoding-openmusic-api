@@ -26,6 +26,13 @@ const routes = (handler) => [
     method: 'DELETE',
     path: '/albums/{id}',
     handler: handler.deleteAlbumByIdHandler,
+    // TODO:FILE UPLOAD EXAMPLE
+    // options: {
+    //   payload: {
+    //     allow: 'multipart/form-data',
+    //     multipart: true,
+    //   },
+    // },
   },
 ];
 
