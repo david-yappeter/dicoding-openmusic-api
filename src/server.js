@@ -9,6 +9,7 @@ const song = require('./api/song');
 const user = require('./api/user');
 const authentication = require('./api/authentication');
 const playlist = require('./api/playlist');
+const collaboration = require('./api/collaboration');
 
 const { PanicHandler } = require('./middleware/panic');
 
@@ -44,18 +45,14 @@ const init = async () => {
     }),
   });
 
-  await server.register({ plugin: album });
-  await server.register({ plugin: song });
-  await server.register({ plugin: user });
-  await server.register({ plugin: authentication });
-  await server.register({ plugin: playlist });
-  // await server.register([
-  //   { plugin: album },
-  //   { plugin: song },
-  //   { plugin: user },
-  //   { plugin: authentication },
-  //   { plugin: playlist },
-  // ]);
+  await server.register([
+    { plugin: album },
+    { plugin: song },
+    { plugin: user },
+    { plugin: authentication },
+    { plugin: playlist },
+    { plugin: collaboration },
+  ]);
 
   await server.start();
   console.log(`server start at ${server.info.uri}`);

@@ -28,10 +28,25 @@ class PlaylistService {
 
   async getPlaylists({ owner }) {
     const result = await this._pool.query({
-      text: 'SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id WHERE u.id = $1',
+      text: 'SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id LEFT JOIN collaborations c ON c.playlist_id = p.id WHERE (u.id = $1 OR c.user_id = $1)',
       values: [owner],
     });
     return result.rows;
+  }
+
+  async getPlaylistById(id) {
+    const query = {
+      text: 'SELECT * FROM playlists WHERE id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new NotFoundError('Playlist Not Found');
+    }
+
+    return result.rows[0];
   }
 
   async getPlaylistByIdWithSongs(id) {
@@ -57,7 +72,7 @@ class PlaylistService {
     };
   }
 
-  async addPlaylistSong({ playlistId, songId }) {
+  async addPlaylistSong({ playlistId, songId, userId }) {
     const id = nanoid(16);
     const query = {
       text: 'INSERT INTO playlist_songs(id, playlist_id , song_id) VALUES($1, $2, $3) RETURNING id',
@@ -69,6 +84,14 @@ class PlaylistService {
     if (!result.rows[0].id) {
       throw new InvariantError('Failed to add song');
     }
+
+    await this.addPlaylistSongActivity({
+      playlistId,
+      songId,
+      userId,
+      action: 'add',
+      time: new Date().toISOString(),
+    });
 
     return result.rows[0].id;
   }
@@ -86,7 +109,7 @@ class PlaylistService {
     }
   }
 
-  async deletePlaylistSongBySongId({ playlistId, songId }) {
+  async deletePlaylistSongBySongId({ playlistId, songId, userId }) {
     const query = {
       text: 'DELETE FROM playlist_songs WHERE playlist_id = $1 AND song_id = $2',
       values: [playlistId, songId],
@@ -97,23 +120,69 @@ class PlaylistService {
     if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
+
+    await this.addPlaylistSongActivity({
+      playlistId,
+      songId,
+      userId,
+      action: 'delete',
+      time: new Date().toISOString(),
+    });
   }
 
-  async verifyPlaylistOwner({ id, owner }) {
+  async addPlaylistSongActivity({ playlistId, songId, userId, action, time }) {
+    const id = `psa-${nanoid(16)}`;
     const query = {
-      text: 'SELECT * FROM playlists where id = $1',
-      values: [id],
+      text: 'INSERT INTO playlist_song_activities (id, playlist_id, song_id, user_id, action, time) VALUES($1,$2,$3,$4,$5,$6) RETURNING id',
+      values: [id, playlistId, songId, userId, action, time],
     };
 
     const result = await this._pool.query(query);
 
     if (!result.rowCount) {
-      throw new NotFoundError('Playlist Not Found');
+      throw new InvariantError('Failed to add activity');
     }
+  }
 
-    const playlist = result.rows[0];
+  async getPlaylistSongActivities(playlistId) {
+    const query = {
+      text: `SELECT s.title,  u.username, psa.action, psa.time
+      FROM playlist_song_activities psa
+      INNER JOIN playlists p on p.id = psa.playlist_id AND p.id = $1
+      INNER JOIN users u on u.id = p.owner
+      INNER JOIN playlist_songs ps on ps.playlist_id = p.id
+      INNER JOIN songs s on s.id = psa.song_id
+      `,
+      values: [playlistId],
+    };
 
-    if (playlist.owner !== owner) {
+    const result = await this._pool.query(query);
+
+    return result.rows;
+  }
+
+  async verifyPlaylistOwnerOnly({ id, owner }) {
+    const query = {
+      text: 'SELECT p.*, c.user_id FROM playlists p LEFT JOIN collaborations c on c.playlist_id = p.id where p.id = $1 AND p.owner = $2',
+      values: [id, owner],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      throw new ForbiddenError('Access Denied');
+    }
+  }
+
+  async verifyPlaylistOwner({ id, owner }) {
+    const query = {
+      text: 'SELECT p.*, c.user_id FROM playlists p LEFT JOIN collaborations c on c.playlist_id = p.id where p.id = $1 AND (p.owner = $2 OR c.user_id = $2)',
+      values: [id, owner],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
       throw new ForbiddenError('Access Denied');
     }
   }
