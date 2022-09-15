@@ -15,6 +15,9 @@ const PanicHandler = (request, h) => {
     return response;
   }
 
+  // Debugging Purpose
+  // console.log(response);
+
   return response;
 };
 

@@ -92,6 +92,37 @@ class AlbumService {
       throw new NotFoundError('No Data Found');
     }
   }
+
+  async getAlbumLikes(id) {
+    const query = {
+      text: 'SELECT COUNT(*)  as count FROM user_album_likes WHERE album_id = $1',
+      values: [id],
+    };
+
+    const result = await this._pool.query(query);
+
+    return result.rows[0].count;
+  }
+
+  async likeAlbum({ albumId, userId }) {
+    const query = {
+      text: 'DELETE FROM user_album_likes WHERE album_id = $1 AND user_id = $2 RETURNING id',
+      values: [albumId, userId],
+    };
+
+    const result = await this._pool.query(query);
+
+    if (!result.rowCount) {
+      const resultCreate = await this._pool.query({
+        text: 'INSERT INTO user_album_likes(id, album_id, user_id) VALUES($1,$2,$3)',
+        values: [`like-${nanoid(16)}`, albumId, userId],
+      });
+
+      if (!resultCreate.rowCount) {
+        throw new InvariantError('Failed to Like');
+      }
+    }
+  }
 }
 
 module.exports = AlbumService;
