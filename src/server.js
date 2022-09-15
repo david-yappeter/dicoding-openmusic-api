@@ -10,6 +10,7 @@ const user = require('./api/user');
 const authentication = require('./api/authentication');
 const playlist = require('./api/playlist');
 const collaboration = require('./api/collaboration');
+const exportPlug = require('./api/export');
 
 const { PanicHandler } = require('./middleware/panic');
 
@@ -52,6 +53,7 @@ const init = async () => {
     { plugin: authentication },
     { plugin: playlist },
     { plugin: collaboration },
+    { plugin: exportPlug },
   ]);
 
   await server.start();
