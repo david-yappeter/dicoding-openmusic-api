@@ -1,11 +1,10 @@
+const path = require('path');
+
 const routes = (handler) => [
   {
     method: 'POST',
     path: '/albums',
     handler: handler.postAlbumHandler,
-    // options: {
-    //   auth: '_openmusic_jwt',
-    // },
   },
   {
     method: 'GET',
@@ -26,13 +25,27 @@ const routes = (handler) => [
     method: 'DELETE',
     path: '/albums/{id}',
     handler: handler.deleteAlbumByIdHandler,
-    // TODO:FILE UPLOAD EXAMPLE
-    // options: {
-    //   payload: {
-    //     allow: 'multipart/form-data',
-    //     multipart: true,
-    //   },
-    // },
+  },
+  {
+    method: 'POST',
+    path: '/albums/{id}/covers',
+    handler: handler.postAlbumCoverHandler,
+    options: {
+      payload: {
+        allow: 'multipart/form-data',
+        multipart: true,
+        output: 'stream',
+      },
+    },
+  },
+  {
+    method: 'GET',
+    path: '/upload/images/{param*}',
+    handler: {
+      directory: {
+        path: path.resolve(__dirname, '../uploads/file/images/'),
+      },
+    },
   },
 ];
 

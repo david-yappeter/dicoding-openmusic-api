@@ -5,7 +5,7 @@ const ExportValidator = require('../../validation/export');
 const PlaylistService = require('../../service/postgres/PlaylistService');
 
 module.exports = {
-  name: 'exports',
+  name: 'exportsplaylists',
   version: '1.0.0',
   register: async (server) => {
     const exportHandler = new ExportHandler(

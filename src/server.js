@@ -1,8 +1,10 @@
 // Apply dotenv
 require('dotenv').config();
+const path = require('path');
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
+const Inert = require('@hapi/inert');
 
 const album = require('./api/album');
 const song = require('./api/song');
@@ -13,6 +15,7 @@ const collaboration = require('./api/collaboration');
 const exportPlug = require('./api/export');
 
 const { PanicHandler } = require('./middleware/panic');
+const StorageService = require('./service/storage/StorageService');
 
 const init = async () => {
   const server = Hapi.server({
@@ -26,7 +29,7 @@ const init = async () => {
     },
   });
 
-  await server.register({ plugin: Jwt });
+  await server.register([{ plugin: Jwt }, { plugin: Inert }]);
   server.ext('onPreResponse', PanicHandler);
 
   // JWT Strategy
@@ -47,7 +50,14 @@ const init = async () => {
   });
 
   await server.register([
-    { plugin: album },
+    {
+      plugin: album,
+      options: {
+        storageService: new StorageService(
+          path.resolve(__dirname, 'api/uploads/file/images')
+        ),
+      },
+    },
     { plugin: song },
     { plugin: user },
     { plugin: authentication },
