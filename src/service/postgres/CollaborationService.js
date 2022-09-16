@@ -2,10 +2,12 @@ const { nanoid } = require('nanoid');
 const { Pool } = require('pg');
 const InvariantError = require('../../exception/InvariantError');
 const NotFoundError = require('../../exception/NotFoundError');
+const CacheService = require('../redis/CacheService');
 
 class CollaborationService {
   constructor() {
     this._pool = new Pool();
+    this._cacheService = new CacheService();
   }
 
   async addCollaboration({ playlistId, userId }) {
@@ -36,6 +38,7 @@ class CollaborationService {
       throw new NotFoundError('No data found');
     }
 
+    this._cacheService.delete(`playlist:${userId}`);
     return result.rows[0].id;
   }
 }

@@ -1,7 +1,8 @@
 class PlaylistHandler {
-  constructor(playlistService, songService, validator) {
+  constructor(playlistService, songService, cacheService, validator) {
     this._service = playlistService;
     this._songService = songService;
+    this._cacheService = cacheService;
     this._validator = validator;
 
     this.postPlaylistHandler = this.postPlaylistHandler.bind(this);
@@ -38,16 +39,23 @@ class PlaylistHandler {
     return response;
   }
 
-  async getPlaylistsHandler(request) {
+  async getPlaylistsHandler(request, h) {
     const { id: credentialId } = request.auth.credentials;
-    const playlists = await this._service.getPlaylists({ owner: credentialId });
+    const { playlists, isCached } = await this._service.getPlaylists({
+      owner: credentialId,
+    });
 
-    return {
+    const response = h.response({
       status: 'success',
       data: {
         playlists,
       },
-    };
+    });
+    if (isCached) {
+      response.header('X-Data-Source', 'cache');
+    }
+
+    return response;
   }
 
   async postPlaylistSongHandler(request, h) {

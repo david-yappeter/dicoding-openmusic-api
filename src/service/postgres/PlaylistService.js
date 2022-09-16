@@ -3,10 +3,12 @@ const { Pool } = require('pg');
 const ForbiddenError = require('../../exception/ForbiddenError');
 const InvariantError = require('../../exception/InvariantError');
 const NotFoundError = require('../../exception/NotFoundError');
+const CacheService = require('../redis/CacheService');
 
 class PlaylistService {
   constructor() {
     this._pool = new Pool();
+    this._cacheService = new CacheService();
   }
 
   async addPlaylist({ name, owner }) {
@@ -23,15 +25,27 @@ class PlaylistService {
       throw new InvariantError('Failed to create song');
     }
 
+    this._cacheService.delete(`playlist:${owner}`);
+
     return result.rows[0].id;
   }
 
   async getPlaylists({ owner }) {
-    const result = await this._pool.query({
-      text: 'SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id LEFT JOIN collaborations c ON c.playlist_id = p.id WHERE (u.id = $1 OR c.user_id = $1)',
-      values: [owner],
-    });
-    return result.rows;
+    let isCached = false;
+    let result;
+    try {
+      result = JSON.parse(await this._cacheService.get(`playlist:${owner}`));
+      isCached = true;
+    } catch (error) {
+      result = await this._pool.query({
+        text: 'SELECT p.id, p.name, u.username FROM playlists p INNER JOIN users u ON p.owner = u.id LEFT JOIN collaborations c ON c.playlist_id = p.id WHERE (u.id = $1 OR c.user_id = $1)',
+        values: [owner],
+      });
+
+      await this._cacheService.set(`playlist:${owner}`, JSON.stringify(result));
+    }
+
+    return { playlists: result.rows, isCached };
   }
 
   async getPlaylistById(id) {
@@ -98,7 +112,7 @@ class PlaylistService {
 
   async deletePlaylistById(id) {
     const query = {
-      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id',
+      text: 'DELETE FROM playlists WHERE id = $1 RETURNING id, owner',
       values: [id],
     };
 
@@ -107,6 +121,8 @@ class PlaylistService {
     if (!result.rowCount) {
       throw new NotFoundError('No Data Found');
     }
+
+    this._cacheService.delete(`playlist:${result.rows[0].owner}`);
   }
 
   async deletePlaylistSongBySongId({ playlistId, songId, userId }) {
