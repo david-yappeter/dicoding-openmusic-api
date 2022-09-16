@@ -17,7 +17,7 @@ class MailSender {
       from: 'Open Music',
       to: targetEmail,
       subject: 'Playlist Export',
-      text: 'Json content of playlist exported',
+      text: 'Json content of playlist exported (check attachment)',
       attachments: [
         {
           filename: 'playlist.json',

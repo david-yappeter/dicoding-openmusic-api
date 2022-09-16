@@ -20,6 +20,7 @@
         "newline-per-chained-call": "off" ,
         "arrow-body-style":"off",
         "comma-dangle":"off",
-        "consistent-return": "off"
+        "consistent-return": "off",
+        "radix":"off"
     }
 }

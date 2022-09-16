@@ -3,12 +3,14 @@ const { Pool } = require('pg');
 
 const InvariantError = require('../../exception/InvariantError');
 const NotFoundError = require('../../exception/NotFoundError');
+const CacheService = require('../redis/CacheService');
 const SongService = require('./SongService');
 
 class AlbumService {
   constructor() {
     this._pool = new Pool();
     this._songService = new SongService();
+    this._cacheService = new CacheService();
   }
 
   async addAlbum({ name, year }) {
@@ -47,10 +49,13 @@ class AlbumService {
 
     const songs = await this._songService.getSongByAlbumId(result.rows[0].id);
 
-    return {
+    const data = {
       ...result.rows[0],
+      coverUrl: result.rows[0].cover,
       songs: songs,
     };
+    delete data.cover;
+    return data;
   }
 
   async editAlbumById(id, { name, year }) {
@@ -101,6 +106,7 @@ class AlbumService {
 
     const result = await this._pool.query(query);
 
+    await this._cacheService.set(`album:${id}`, result.rows[0].count);
     return result.rows[0].count;
   }
 
@@ -122,6 +128,7 @@ class AlbumService {
         throw new InvariantError('Failed to Like');
       }
     }
+    await this._cacheService.delete(`album:${albumId}`);
   }
 }
 

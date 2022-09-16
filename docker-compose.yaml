@@ -46,6 +46,16 @@ services:
     ports:
       - "5672:5672"
       - "15672:15672"
+  
+  redis:
+    container_name: dicoding_redis
+    image: redis:7.0.4
+    networks:
+      - postgres
+    volumes:
+      - redis:/data
+    ports:
+      - "6379:6379"
 
 networks:
   postgres:
@@ -55,3 +65,4 @@ volumes:
   postgres:
   pgadmin:
   rabbitmq:
+  redis:

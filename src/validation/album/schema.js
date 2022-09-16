@@ -14,6 +14,7 @@ const ImageHeadersSchema = Joi.object({
       'image/apng',
       'image/avif',
       'image/gif',
+      'image/jpg',
       'image/jpeg',
       'image/png',
       'image/webp'

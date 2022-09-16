@@ -1,7 +1,8 @@
 class AlbumHandler {
-  constructor(service, storageService, validator) {
+  constructor(service, storageService, cacheService, validator) {
     this._service = service;
     this._storageService = storageService;
+    this._cacheService = cacheService;
     this._validator = validator;
 
     this.postAlbumHandler = this.postAlbumHandler.bind(this);
@@ -105,17 +106,31 @@ class AlbumHandler {
     return response;
   }
 
-  async getAlbumLikesHandler(request) {
+  async getAlbumLikesHandler(request, h) {
     const { id } = request.params;
+    let likes;
+    let response;
+    // try get cached
+    try {
+      likes = await this._cacheService.get(`album:${id}`);
+      response = h.response({
+        status: 'success',
+        data: {
+          likes: parseInt(likes),
+        },
+      });
+      response.header('X-Data-Source', 'cache');
+    } catch (error) {
+      likes = await this._service.getAlbumLikes(id);
+      response = h.response({
+        status: 'success',
+        data: {
+          likes: parseInt(likes),
+        },
+      });
+    }
 
-    const likes = await this._service.getAlbumLikes(id);
-
-    return {
-      status: 'success',
-      data: {
-        likes: parseInt(likes),
-      },
-    };
+    return response;
   }
 
   async postAlbumLikeHandler(request, h) {
